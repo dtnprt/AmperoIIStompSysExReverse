@@ -4,11 +4,14 @@
 
 #### Patch Information
 ```plain
+Payload Starts on 0x0b on every packet
+
 
 Byte 9 = Package Length? 
     03-05?
-        @05 The Name Starts @98 instead of @100
+        @05 The Name Starts @98 instead of @100??
 Byte 10-15 = Message Type? 
+
     00 00 00 00 00 00 = Patch Information (General)
     39 01 xx xx xx xx = Patch Information (Detail)
     72 02 02 03 0E 0C = Patch Information (Even More)

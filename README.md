@@ -51,13 +51,12 @@ Bytes 100-132 = Patch Name (Nibbels to ASCII)
 
 ### Other
 
-
+```
 
 #### Get Firmware Version
 ```plain
 f021254d50000008110800000000050000000000030000000000000000f7
-
-``` 
+```
 #### Get Current Patch and Scene Information
 ```plain
 f021254d50000009110800000000000000000900000000000000000000f7 

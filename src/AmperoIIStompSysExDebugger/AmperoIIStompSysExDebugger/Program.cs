@@ -202,11 +202,20 @@ namespace InputDeviceExample
 
                 }
 
-                // Patch Information (General)
-                else if (sysex_input[10] == 0x00 && sysex_input[11] == 0x00 && sysex_input[12] == 0x00 && sysex_input[13] == 0x00 && sysex_input[14] == 0x00 && sysex_input[15] == 0x00 && sysex_input[17] == 0x00)
+                // Patch Information Block
+                else if (
+                    (sysex_input[0x0a] == 0x00 && sysex_input[0x0b] == 0x00 && sysex_input[0x0c] == 0x00 && sysex_input[0x0d] == 0x00 && sysex_input[0x0e] == 0x00 && sysex_input[0x0f] == 0x00 
+                            && sysex_input[0x11] == 0x00
+                    )
+                    ||
+                    (sysex_input[0x0a] == 0x39 && sysex_input[0x0b] == 0x01)
+                    ||
+                    (sysex_input[0x0a] == 0x72 && sysex_input[0x0b] == 0x02)
+                    )
+
                 {
 
-                    Console.Write($"(i) Found Patch Information Block #1:\n".Pastel("f0c674"));
+                    Console.Write($"(i) found patch information block:\n".Pastel("f0c674"));
 
                     int version = sysex_input[9]; // ???
 
@@ -224,38 +233,37 @@ namespace InputDeviceExample
                     byte[] payload = sysex_input.Skip(payload_start).Take(sysex_input.Length - payload_start - 0x01).ToArray();
                     byte[] converted_payload = ConvertNibblePayload(payload);
 
-                    Console.Write($"\n(i) Converted Payload:\n".Pastel("f0c674"));
+                    Console.Write($"\n(i) converted payload:\n".Pastel("f0c674"));
 
                     Marker marker_payload = new Marker();
                     marker_payload.AddRange([0x08, 0x09], "cc6666");
                     marker_payload.AddRange(0x2c, 0x3c, "#569CD6");
 
                     ConsoleHelper.HexDump(new Blob(converted_payload), _bytes_per_line, marker_payload, true);
-                    
 
-                    const int offeset_bank_patch = 0x08;
+                    if (sysex_input[0x0a] == 0x00)
+                    {
+                        const int offeset_bank_patch = 0x08;
 
-
-
-                    int preset_index = (converted_payload[offeset_bank_patch + 1] << 8) + converted_payload[offeset_bank_patch];
-                    int preset_bank = preset_index / 3;
-                    int preset_patch = preset_bank == 0 ? preset_index + 1 : (preset_index % preset_bank + 1);
-
-
-                    // Get 32 Bytes from Offset 101, convert nibbles to bytes an get 16 chars to string
-                    int offeset_preset_name = 0x2d;
-
-                    int char_index = 0;
-                    char[] preset_name_arr = new char[16];
-
-                    for (int i = offeset_preset_name; i < (offeset_preset_name + 16); i++)
-                        preset_name_arr[char_index++] = (char)converted_payload[i];
-
-                    var preset_name = new string(preset_name_arr);
+                        int preset_index = (converted_payload[offeset_bank_patch + 1] << 8) + converted_payload[offeset_bank_patch];
+                        int preset_bank = preset_index / 3;
+                        int preset_patch = preset_bank == 0 ? preset_index + 1 : (preset_index % preset_bank + 1);
 
 
-                    Console.Write($"\n(i) extracted information: Patch ".Pastel("ffffff") + $"A{preset_bank:D2}-{preset_patch}".Pastel("#cc6666") + $", Name: \"{preset_name.Pastel("#569CD6")}\"\n");
+                        // Get 32 Bytes from Offset 101, convert nibbles to bytes an get 16 chars to string
+                        int offeset_preset_name = 0x2d;
 
+                        int char_index = 0;
+                        char[] preset_name_arr = new char[16];
+
+                        for (int i = offeset_preset_name; i < (offeset_preset_name + 16); i++)
+                            preset_name_arr[char_index++] = (char)converted_payload[i];
+
+                        var preset_name = new string(preset_name_arr);
+
+
+                        Console.Write($"\n(i) extracted information: Patch ".Pastel("ffffff") + $"A{preset_bank:D2}-{preset_patch}".Pastel("#cc6666") + $", preset name: \"{preset_name.Pastel("#569CD6")}\"\n");
+                    }
                 }
 
                 // Other
@@ -268,9 +276,10 @@ namespace InputDeviceExample
                     byte[] payload = sysex_input.Skip(payload_start).Take(sysex_input.Length - payload_start - 0x01).ToArray();
                     byte[] convertedNibbles = ConvertNibblePayload(payload);
 
-                    Console.Write($"(i) Unknown Block:\n".Pastel("ffffff"));
+                    Console.Write($"(i) received unknown block:\n".Pastel("ffffff"));
                     ConsoleHelper.HexDump(new Blob(sysex_input), _bytes_per_line, marker, true);
-                    Console.Write($"(i) Converted Payload:\n".Pastel("f0c674"));
+
+                    Console.Write($"(i) converted payload:\n".Pastel("f0c674"));
                     ConsoleHelper.HexDump(new Blob(convertedNibbles), _bytes_per_line, new Marker(), true);
                 }
 
@@ -286,7 +295,7 @@ namespace InputDeviceExample
         public static byte[] ConvertNibblePayload(byte[] payload)
         {
             if (payload.Length % 2 != 0)
-                throw new Exception("Payload not dividable by 2!");
+                throw new Exception("payload not dividable by 2!");
 
             byte[] result = new byte[payload.Length / 2];
 

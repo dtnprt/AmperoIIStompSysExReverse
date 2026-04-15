@@ -31,6 +31,8 @@ public class Selection
 {
     public int Offset { get; set; }
     public int Length { get; set; }
+
+
     public int End
     {
         get
@@ -53,32 +55,36 @@ public class Selection
     }
 }
 
-public class ColorInfo 
+public class MarkerData 
 {
     public string? ForegroundColor { get; set; }
     public string? BackgroundColor { get; set; }
+    public string Description  { get; set; }
 
-    public ColorInfo()
+    public MarkerData()
     {
         this.ForegroundColor = null;
         this.BackgroundColor = null;
+        this.Description = string.Empty;
     }
-    public ColorInfo(string? ForegroundColor)
+    public MarkerData(string? ForegroundColor, string Description = "")
     {
         this.ForegroundColor = ForegroundColor;
         this.BackgroundColor = null;
+        this.Description = Description;
     }
-    public ColorInfo(string? ForegroundColor, string? BackgroundColor)
+    public MarkerData(string? ForegroundColor, string? BackgroundColor, string Description = "")
     {
         this.ForegroundColor = ForegroundColor;
         this.BackgroundColor = BackgroundColor;
+        this.Description = Description;
     }
 
 }
 
 public class Marker
 {
-    Dictionary<long, ColorInfo> markerDB = new Dictionary<long, ColorInfo>();
+    Dictionary<long, MarkerData> markerDB = new Dictionary<long, MarkerData>();
 
     public Marker()
     {
@@ -106,25 +112,25 @@ public class Marker
             return null;
     }
 
-    public ColorInfo GetColorInfo(long Offset)
+    public MarkerData GetColorInfo(long Offset)
     {
         if (markerDB.ContainsKey(Offset))
             return markerDB[Offset];
         else
-            return new ColorInfo();
+            return new MarkerData();
     }
 
     public void Add(long Offset, string ForgroundColor)
     {
-        this.Add(Offset, new ColorInfo(ForgroundColor));
+        this.Add(Offset, new MarkerData(ForgroundColor));
     }
 
     public void Add(long Offset, string ForgroundColor, string BackgroundColor)
     {
-        this.Add(Offset, new ColorInfo(ForgroundColor, BackgroundColor));
+        this.Add(Offset, new MarkerData(ForgroundColor, BackgroundColor));
     }
 
-    public void Add(long Offset, ColorInfo ColorInfo)
+    public void Add(long Offset, MarkerData ColorInfo)
     {
         if (markerDB.ContainsKey(Offset))
             markerDB[Offset] = ColorInfo;
@@ -133,15 +139,15 @@ public class Marker
     }
     public void AddRange(long StartOffset, long EndOffset, string ForgroundColor)
     {
-        this.AddRange(StartOffset, EndOffset, new ColorInfo(ForgroundColor, null));
+        this.AddRange(StartOffset, EndOffset, new MarkerData(ForgroundColor, null));
     }
 
     public void AddRange(long StartOffset, long EndOffset, string ForgroundColor, string BackgroundColor)
     {
-        this.AddRange(StartOffset, EndOffset, new ColorInfo(ForgroundColor, BackgroundColor));
+        this.AddRange(StartOffset, EndOffset, new MarkerData(ForgroundColor, BackgroundColor));
     }
 
-    public void AddRange(long StartOffset, long EndOffset, ColorInfo ColorInfo)
+    public void AddRange(long StartOffset, long EndOffset, MarkerData ColorInfo)
     {
         for (long i = StartOffset; i <= EndOffset; i++)
         {
@@ -154,15 +160,15 @@ public class Marker
 
     public void AddRange(long[] Offsets, string ForgroundColor)
     {
-        this.AddRange(Offsets, new ColorInfo(ForgroundColor, null));
+        this.AddRange(Offsets, new MarkerData(ForgroundColor, null));
     }
 
     public void AddRange(long[] Offsets, string ForgroundColor, string BackgroundColor)
     {
-        this.AddRange(Offsets, new ColorInfo(ForgroundColor, BackgroundColor));
+        this.AddRange(Offsets, new MarkerData(ForgroundColor, BackgroundColor));
     }
 
-    public void AddRange(long[] Offsets, ColorInfo ColorInfo)
+    public void AddRange(long[] Offsets, MarkerData ColorInfo)
     {
         for (long i = 0; i < Offsets.Length; i++)
         {

@@ -1,6 +1,18 @@
 # Ampero II Stomp SysEx Reverse Engeneering
 
+## Format
+* 1 byte, `F0`: SysEx start
+* 6 bytes, `21 25 4D 50 00 00`: Start of every packet
+* 1 byte,  `xx`:  unknown (CheckSum?)
+* 1 byte:  `11` or `12` for Send/Return SysEx messages
+* 2 bytes: payload length of the converted payload in little endian
+* 2 bytes: payload offset of the converted payload in little endian?
+* ... : Payload in nibbles (0x, 0y > xy)
+* 1 byte, `F7`: SysEx end
+
+
 ## SysEx Commands
+
 #### Get Firmware Version
 ```plain
 F0 21 25 4D 50 00 00 08 11 08 00 00 00 00 05 00 00 00 00 00 03 00 00 00 00 00 00 00 00 F7
@@ -51,20 +63,9 @@ F0 21 25 4D 50 00 00 1E 11 10 00 00 00 00 03 00 00 00 0A 00 01 00 08 00 00 00 00
 
 #### Patch Information
 ```plain
-Payload Starts on 0x0b on every packet
+Payload Starts on 0x0d on every packet
 
 
-Byte 9 = Package Length? 
-    03-05?
-        @05 The Name Starts @98 instead of @100??
-Byte 10-15 = Message Type? 
-
-    00 00 00 00 00 00 = Patch Information (General)
-    39 01 xx xx xx xx = Patch Information (Detail)
-    72 02 02 03 0E 0C = Patch Information (Even More)
-
-Bytes 32-35 = Bank Index Format: (34 << 12) + (35 << 8) + (32 << 4) + 33
-Bytes 100-132 = Patch Name (Nibbels to ASCII)
 
 ```
 
@@ -98,4 +99,48 @@ Bytes 100-132 = Patch Name (Nibbels to ASCII)
 
 ### Other
 
+#### On block change:
+* `0x07` (converted): Slot Number
+
+```plain
+(i) received unknown block:
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f    0123456789abcdef
+0x00   21 25 4d 50 00 00 3f 12  14 00 00 00 00 03 00 00    !%MP··?·········
+0x10   00 0a 00 01 00 0c 00 00  00 00 00 00 01 09 00 00    ················
+0x20   00 00 00 00 00 00 00 00  08 00 01 03 04 04 01 01    ················
+0x30   00 00 00 00 f7                                      ····÷
+
+(i) converted payload:
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f    0123456789abcdef
+0x00   0a 01 0c 00 00 00 19 xx  00 00 00 00 80 13 44 11    ············?·D·
+0x10   00 00                                               ··
+```
+
+#### Block switch on/off
+
+*    `0x07` (converted): Block ID
+*    `0x0d` (converted): State
+
+```plain
+(i) received unknown block:
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f    0123456789abcdef
+0x00   21 25 4d 50 00 00 3b 12  13 00 00 00 00 02 00 00    !%MP··;·········
+0x10   00 04 00 01 00 0b 00 00  00 00 00 00 01 08 00 00    ················
+0x20   00 01 00 00 00 00 00 00  00 01 00 00 01 01 00 00    ················
+0x30   00 00 f7                                            ··÷
+(i) converted payload:
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f    0123456789abcdef
+0x00   04 01 0b 00 00 00 18 00  01 00 00 00 01 00 11 00    ················
+0x10   00                                                  ·
+
+(i) received unknown block:
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f    0123456789abcdef
+0x00   21 25 4d 50 00 00 3b 12  13 00 00 00 00 02 00 00    !%MP··;·········
+0x10   00 04 00 01 00 0b 00 00  00 00 00 00 01 08 00 00    ················
+0x20   00 01 00 00 00 00 00 00  00 01 00 01 01 01 00 00    ················
+0x30   00 00 f7                                            ··÷
+(i) converted payload:
+       00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f    0123456789abcdef
+0x00   04 01 0b 00 00 00 18 00  01 00 00 00 01 01 11 00    ················
+0x10   00    
 ```

@@ -25,6 +25,7 @@ public class ConsoleHelper
 
     static char[] HexChars = "0123456789abcdef".ToCharArray();
     static char nonPrintableChar = '·';
+    static char nullChar = '·';
     static string spaceChar = " ";
 
     static int firstHexColumn = 12; // 8 characters for the address +  3 spaces
@@ -506,8 +507,16 @@ public class ConsoleHelper
 
                     hexPart += newHexPart.Pastel(color);
                     hexPart += spaceChar;
+                    // ␀
+                    char ascii_char = nonPrintableChar;
+                    //(b < 32 ? nonPrintableChar : (char)b)
 
-                    asciiPart += ("" + (b < 32 ? nonPrintableChar : (char)b)).Pastel(color);
+                    if(b == 0)
+                        ascii_char = nullChar;
+                    else if (b > 32)
+                        ascii_char = (char)b;
+
+                    asciiPart += ("" + ascii_char).Pastel(color);
 
                 }
             }

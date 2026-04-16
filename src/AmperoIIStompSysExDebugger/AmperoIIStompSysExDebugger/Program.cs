@@ -247,7 +247,7 @@ namespace InputDeviceExample
                     byte[] converted_payload = ConvertNibblePayload(payload);
 
                     Console.Write($"(i) Scene Block:\n".Pastel("ffffff"));
-                    ConsoleHelper.HexDump(new Blob(sysex_input), _bytes_per_line, sysex_marker, true);
+                    ConsoleHelper.HexDump(new Blob(sysex_input), _bytes_per_line, sysex_marker, true, 0, false, -1, -1, _outputMode);
 
                     Marker marker_payload = new Marker();
                     marker_payload.Add(0x07, "ff00ff");
@@ -299,7 +299,7 @@ namespace InputDeviceExample
                     marker.AddRange(0x21, 0x24, "#ff00ff", "Patch Index"); // Patch Index
                     marker.AddRange(0x65, 0x85, "#00ffff", "Patch Name"); // Patch Name
 
-                    ConsoleHelper.HexDump(new Blob(sysex_offset_counter, sysex_input), _bytes_per_line, sysex_marker, true);
+                    ConsoleHelper.HexDump(new Blob(sysex_offset_counter, sysex_input), _bytes_per_line, sysex_marker, true, 0, false, -1, -1, _outputMode);
 
 
 
@@ -357,7 +357,7 @@ namespace InputDeviceExample
                     byte[] converted_payload = ConvertNibblePayload(payload);
 
                     Console.Write($"(i) received unknown block:\n".Pastel("ffffff"));
-                    ConsoleHelper.HexDump(new Blob(sysex_input), _bytes_per_line, sysex_marker, true);
+                    ConsoleHelper.HexDump(new Blob(sysex_input), _bytes_per_line, sysex_marker, true, 0, false, -1, -1, _outputMode);
 
                     Console.Write($"\n(i) converted payload ({converted_payload.Length} bytes):\n".Pastel("f0c674"));
                     ConsoleHelper.HexDump(new Blob(converted_payload), _bytes_per_line, new Marker(), true, 0, false, -1, -1, _outputMode);
